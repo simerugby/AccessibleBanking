@@ -40,6 +40,9 @@ namespace AccessibleBank.Controllers
             if (fromAccount.UserId != userId)
                 return Unauthorized("You don't own the source account.");
 
+            if (fromAccount.Balance == 0)
+                return BadRequest("Insufficient funds.");
+
             if (fromAccount.Balance < transaction.Amount)
                 return BadRequest("Insufficient funds.");
 

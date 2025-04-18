@@ -25,7 +25,14 @@ namespace AccessibleBank.Controllers
         public async Task<IActionResult> CreateAccount([FromBody] Account account)
         {
             var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+
+            bool exists = await _context.Accounts.AnyAsync(a => a.UserId == userId && a.Currency == account.Currency && a.Type == account.Type);
+            if (exists)
+                return BadRequest("You already have this type of account in that currency");
+            
             account.UserId = userId;
+            account.Balance = 0;
+            
             _context.Accounts.Add(account);
             await _context.SaveChangesAsync();
 

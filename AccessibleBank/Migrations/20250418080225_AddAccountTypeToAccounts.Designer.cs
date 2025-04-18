@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AccessibleBank.Migrations
 {
     [DbContext(typeof(BankingContext))]
-    [Migration("20250416091002_AddTransactionFieldsFixed")]
-    partial class AddTransactionFieldsFixed
+    [Migration("20250418080225_AddAccountTypeToAccounts")]
+    partial class AddAccountTypeToAccounts
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -40,6 +40,9 @@ namespace AccessibleBank.Migrations
                     b.Property<string>("Currency")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
 
                     b.Property<int>("UserId")
                         .HasColumnType("int");
