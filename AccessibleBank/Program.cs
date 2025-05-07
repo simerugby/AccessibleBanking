@@ -1,16 +1,27 @@
+//AccessibleBank.Data to register the BankingContext for EF Core
+//EntityFrameworkCore for confuguring the SQL Server DbContext
+//JwtBearer and Tokens to set up JWT bearer authentication
+//Text for encoding the JWT signing key
 using AccessibleBank.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
+//Creates a new WebApplicationBuilder using provided command-line args. This initializes
+// configuration, logging and depedency injection
 var builder = WebApplication.CreateBuilder(args);
 
+//Defines a constant name for the CORS policy that will be configured later
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
-
+//Configures QuestPDF(used for PDF exports) to use the community license
 QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
 
+//CORS configuration
+//Registers CORS services and defines a policy named _myAllowSpecificOrigins
+//Allows requests from the frontend origin :5173 (Vite dev server)
+//Permits any header and HTTP method for that origin
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(name: MyAllowSpecificOrigins,
