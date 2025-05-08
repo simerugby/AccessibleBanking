@@ -33,18 +33,26 @@ builder.Services.AddCors(options =>
         });
 });
 
-// Add services to the container.
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+//Database context registration:
+//Adds BankingContext as a service, configuring it to use SQL Server with the given connection string
+//Connection string points to local SQL Server instance localhost\ACCESSIBLEBANK and database AccessibleBankDB with credentials
 builder.Services.AddDbContext<BankingContext>(options =>
     options.UseSqlServer("Server=localhost\\ACCESSIBLEBANK;Database=AccessibleBankDB;User Id=sa;Password=nextstepdubai;TrustServerCertificate=True;"));
 
+//Swagger/OpenAPI setup:
+//1 AddEndpointsApiExplorer(): exposes minimal API endpoints for Swagger
+//2 AddControllers(): registers MVC controllers
+//3 AddSwaggerGen(): configures Swagger generation:
+//3.1 Defines a document named v1
+//3.2 Adds a security definition for Bearer JWT in the Authorization header
+//3.3 Applies a global security requirement so endpoints require the Bearer scheme in Swagger UI
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddControllers();
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new() { Title = "AccessibleBank API", Version = "v1" });
 
-    // ✅ Add JWT Authentication support
+    
     c.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
     {
         Description = "JWT Authorization header using the Bearer scheme. Example: 'Bearer {token}'",
@@ -70,6 +78,10 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
+//Authentication & Authorization:
+//1 Registers JWT bearer authentication with default scheme
+//2 Configures token validation parameters using settings from appsettings.json: Validates issuer, audience, token expiry, and signing key
+//3 Registers authorization services
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -87,19 +99,27 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddAuthorization();
 
+//Builds the WebApplication instance from the configured builder (finalizes service registrations and middleware configuration)
 var app = builder.Build();
 
-// Middleware pipeline
+//Development-only middleware: If running in the Development environment, enables Swagger middleware and UI at /swagger
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
+//Global middleware order:
+//1 UseHttpsRedirection(): redirects HTTP requests to HTTPS
+//2 UseAuthentication(): enables the authentication middleware to validate JWT tokens
+//3 UseCors(...): applies the CORS policy to incoming requests
+//4 UseAuthorization(): enforces authorization policies
+//5 MapControllers(): maps attribute-routed controllers to endpoints
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseCors(MyAllowSpecificOrigins);
 app.UseAuthorization();
 app.MapControllers();
 
+//Starts the application, listening for incoming HTTP requests
 app.Run();
